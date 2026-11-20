@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Python File Processing Lab</title>
+<meta name="description" content="Learn Python text file processing: paths, opening, reading, writing, closing, exceptions and the with statement, with runnable code, quizzes and exam practice.">
+<style>
+:root{
+  --bg:#f7f6f2; --surface:#ffffff; --surface-2:#f0eee8; --text:#1f2328; --muted:#5d6470;
+  --line:#dedbd2; --accent:#2f6f5e; --accent-soft:#e1efe9; --code-bg:#1e2430; --code-text:#e6e9ef;
+  --ok:#2f7d4a; --ok-soft:#e3f2e8; --bad:#b4413a; --bad-soft:#f8e5e3;
+  --list:#3a6ea5; --tuple:#8a5a2b; --set:#6b4fa3; --dict:#2f6f5e;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181d; --surface:#1d2128; --surface-2:#252a33; --text:#e7e9ee; --muted:#a3abb8;
+    --line:#333a45; --accent:#7cc4ad; --accent-soft:#1f3a33; --code-bg:#0f1217; --code-text:#e6e9ef;
+    --ok:#7fd39a; --ok-soft:#1d3427; --bad:#f19a92; --bad-soft:#3a2221;
+    --list:#8db8e8; --tuple:#e0b07a; --set:#b9a1ea; --dict:#7cc4ad;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15181d; --surface:#1d2128; --surface-2:#252a33; --text:#e7e9ee; --muted:#a3abb8;
+  --line:#333a45; --accent:#7cc4ad; --accent-soft:#1f3a33; --code-bg:#0f1217; --code-text:#e6e9ef;
+  --ok:#7fd39a; --ok-soft:#1d3427; --bad:#f19a92; --bad-soft:#3a2221;
+  --list:#8db8e8; --tuple:#e0b07a; --set:#b9a1ea; --dict:#7cc4ad;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+code,pre,textarea{font-family:ui-monospace,"Cascadia Code",Consolas,monospace}
+a{color:var(--accent)}
+header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.bar{max-width:1080px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font-weight:700;font-size:18px;margin-right:auto}
+.brand small{display:block;font-weight:400;font-size:13px;color:var(--muted)}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:none;border:1px solid transparent;color:var(--text);padding:8px 14px;border-radius:8px;font:inherit;font-size:15px;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+main{max-width:1080px;margin:0 auto;padding:24px 16px 64px}
+section[hidden]{display:none}
+h1{font-size:28px;margin:0 0 6px}
+h2{font-size:22px;margin:32px 0 10px}
+h3{font-size:18px;margin:20px 0 8px}
+p.lead{color:var(--muted);margin:0 0 20px;max-width:760px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;border-top:4px solid var(--c)}
+.card h3{margin:0 0 4px;color:var(--c)}
+.card code{font-size:15px}
+.card ul{margin:8px 0 0;padding-left:18px}
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:15px}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--surface-2);font-weight:600}
+tr:last-child td{border-bottom:none}
+td code,p code,li code{background:var(--surface-2);padding:1px 5px;border-radius:4px;font-size:14px}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.steps li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px 10px 48px;position:relative}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:14px;top:10px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--surface);font-weight:700;font-size:13px;display:grid;place-items:center}
+.note{background:var(--accent-soft);border-left:4px solid var(--accent);padding:10px 14px;border-radius:6px;margin:14px 0}
+/* lab */
+.lab{display:grid;grid-template-columns:260px 1fr;gap:16px}
+@media (max-width:760px){.lab{grid-template-columns:1fr}}
+.ex-list{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px;max-height:620px;overflow:auto}
+.ex-group{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:10px 8px 4px}
+.ex-list button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--text);padding:7px 10px;border-radius:7px;font:inherit;font-size:14px;cursor:pointer}
+.ex-list button:hover{background:var(--surface-2)}
+.ex-list button.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.editor{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.editor-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.editor-head strong{margin-right:auto}
+textarea#code{width:100%;min-height:300px;border:none;resize:vertical;padding:14px;background:var(--code-bg);color:var(--code-text);font-size:14px;line-height:1.55;tab-size:4;outline:none}
+pre#out{margin:0;padding:14px;min-height:120px;background:var(--surface-2);font-size:14px;white-space:pre-wrap;word-break:break-word;border-top:1px solid var(--line)}
+pre#out.err{color:var(--bad)}
+.btn{background:var(--accent);color:var(--surface);border:none;padding:8px 16px;border-radius:8px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.btn.ghost{background:none;color:var(--text);border:1px solid var(--line);font-weight:400}
+.btn:disabled{opacity:.6;cursor:wait}
+.status{font-size:13px;color:var(--muted)}
+/* quiz */
+.quiz-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.score{font-weight:700;font-size:18px}
+.progress{flex:1;min-width:160px;height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.progress span{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.q .qn{font-size:13px;color:var(--muted)}
+.q pre{background:var(--code-bg);color:var(--code-text);padding:10px 12px;border-radius:8px;overflow-x:auto;font-size:14px;margin:8px 0}
+.opts{display:grid;gap:6px;margin-top:8px}
+.opts button{text-align:left;background:var(--surface);border:1px solid var(--line);color:var(--text);padding:9px 12px;border-radius:8px;font:inherit;font-size:15px;cursor:pointer}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok);font-weight:600}
+.opts button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.opts button:disabled{cursor:default}
+.explain{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--surface-2);font-size:15px}
+/* exam */
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.ex h3{margin:0 0 6px;font-size:17px}
+.ex details summary{cursor:pointer;font-weight:600;color:var(--accent)}
+.ex pre{background:var(--code-bg);color:var(--code-text);padding:10px 12px;border-radius:8px;overflow-x:auto;font-size:14px}
+.ans{border-top:1px dashed var(--line);margin-top:12px;padding-top:10px}
+.marks{float:right;font-size:13px;color:var(--muted);font-weight:400}
+.theme{background:none;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit;font-size:14px}
+@media (max-width:640px){header{position:static}.bar{gap:10px}nav{order:3;width:100%;flex-wrap:nowrap;overflow-x:auto}nav button{white-space:nowrap;padding:7px 10px}.brand{font-size:16px}}
+h2[id]{scroll-margin-top:16px;margin-top:40px;padding-top:14px;border-top:2px solid var(--line)}
+h3{margin:22px 0 8px}
+pre.big{background:var(--code-bg);color:var(--code-text);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:14px;line-height:1.55;margin:10px 0}
+pre.mini{background:var(--code-bg);color:var(--code-text);padding:8px 10px;border-radius:8px;font-size:12.5px;overflow-x:auto;margin:6px 0 0}
+pre.outp{background:var(--surface-2);border-left:4px solid var(--accent);padding:10px 14px;border-radius:8px;font-size:14px;overflow-x:auto;margin:-2px 0 12px}
+pre.outp::before{content:"Output";display:block;font:600 12px system-ui,sans-serif;color:var(--muted);margin-bottom:4px}
+.warn{background:var(--bad-soft,#f8e5e3);border-left:4px solid var(--bad,#b4413a);padding:10px 14px;border-radius:6px;margin:14px 0}
+.warn ul{margin:6px 0 0;padding-left:20px}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px}
+.toc a{padding:6px 12px;border:1px solid var(--line);border-radius:99px;background:var(--surface);color:var(--text);text-decoration:none;font-size:14px}
+.toc a:hover{border-color:var(--accent);color:var(--accent)}
+.uml{border:2px solid var(--text);border-radius:4px;background:var(--surface);font-family:ui-monospace,Consolas,monospace;font-size:13.5px;min-width:0}
+.u-name{text-align:center;font-weight:700;padding:6px 10px;border-bottom:2px solid var(--text);font-family:system-ui,sans-serif}
+.st-label{font-size:13px;color:var(--muted);margin:0 0 6px;font-family:ui-monospace,Consolas,monospace}
+.lead+.toc{margin-top:4px}
+/* characters strip */
+.chars{display:flex;flex-wrap:wrap;gap:3px;font-family:ui-monospace,Consolas,monospace;font-size:15px;padding:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.ch{min-width:24px;height:34px;display:grid;place-items:center;border:1px solid var(--line);border-radius:5px;background:var(--surface-2);position:relative;padding:0 3px}
+.ch.nl{background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:13px}
+.ch.sp{color:var(--muted)}
+.ch .ix{position:absolute;bottom:-15px;font-size:9px;color:var(--muted)}
+.chars.big{padding:10px 10px 22px;row-gap:20px}
+.ch.got{background:#fde9a8;border-color:#c9a227;color:#3b2e00}
+.ch.done{opacity:.4}
+.ch.cur::before{content:"";position:absolute;left:-4px;top:-5px;bottom:-5px;width:3px;background:#d0342c;border-radius:2px}
+.ch.endc{border-style:dashed;background:none;color:var(--muted);font-size:11px}
+.cur-key{color:#d0342c;font-weight:700}
+.cd-btns{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.cd-btns .btn{font-family:ui-monospace,Consolas,monospace;font-size:13px}
+#cdLog{min-height:90px;max-height:240px;overflow:auto;margin:0}
+/* path */
+.path{display:flex;flex-wrap:wrap;align-items:center;gap:2px;font-family:ui-monospace,Consolas,monospace;font-size:18px;margin:10px 0}
+.pc{padding:6px 10px;border-radius:6px;font-weight:600}
+.sep{font-weight:700;color:var(--muted);padding:0 2px}
+.drive,.lg.drive{background:#efe1fb;color:#6a2fa0}.dir,.lg.dir{background:#ddeafb;color:#1f5594}.file,.lg.file{background:#ddf3e4;color:#1d6b3a}
+.lg{padding:2px 8px;border-radius:99px;font-size:13px;margin-right:6px}
+/* demos */
+.demo{background:var(--surface);border:2px solid var(--accent);border-radius:14px;padding:16px;margin:18px 0}
+.md-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0;font-size:14px}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{background:var(--surface);border:none;border-right:1px solid var(--line);color:var(--text);padding:8px 14px;font:inherit;font-size:14px;cursor:pointer;font-family:ui-monospace,Consolas,monospace}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--accent);color:var(--surface);font-weight:700}
+.md-out{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin-top:8px}
+@media (max-width:700px){.md-out{grid-template-columns:1fr}}
+.md-res{border-radius:10px;padding:12px;background:var(--surface-2);font-size:14px;min-height:120px}
+.md-res .ok{color:var(--ok,#2f7d4a);font-weight:700}.md-res .er{color:var(--bad,#b4413a);font-weight:700}
+.md-res pre{background:var(--code-bg);color:var(--code-text);padding:8px 10px;border-radius:6px;margin:6px 0;font-size:13px;white-space:pre-wrap}
+.md-res .why{margin-top:8px;color:var(--text)}
+#learn p code,#learn li code,.warn code,.note code,.md-res .er{overflow-wrap:anywhere}
+
+footer{max-width:1080px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">Python File Processing Lab<small>Chapter 4C · Text File Processing</small></div>
+    <nav role="tablist">
+      <button role="tab" data-tab="learn" aria-selected="true">Learn</button>
+      <button role="tab" data-tab="lab" aria-selected="false">Code Lab</button>
+      <button role="tab" data-tab="quiz" aria-selected="false">Quiz</button>
+      <button role="tab" data-tab="exam" aria-selected="false">Exam Practice</button>
+    </nav>
+    <button class="theme" id="theme">Dark mode</button>
+  </div>
+</header>
+
+<main>
+<!-- LEARN -->
+<section id="learn">
+  <h1>Text File Processing</h1>
+  <p class="lead">Variables disappear when a program ends. <strong>Files</strong> keep data on disk so it can be read again later, by the same program or another one. This chapter shows how Python finds a file, opens it, reads and writes it, closes it safely, and handles the errors that can happen along the way.</p>
+
+  <div class="toc">
+    <a href="#f1">1 · Text files</a><a href="#f2">2 · File paths</a><a href="#f3">3 · os.path</a><a href="#f4">4 · Opening &amp; modes</a><a href="#f5">5 · File objects</a><a href="#f6">6 · Reading</a><a href="#f7">7 · Writing</a><a href="#f8">8 · Closing</a><a href="#f9">9 · Exceptions</a><a href="#f10">10 · with</a><a href="#f11">11 · Rename, copy, move</a><a href="#f12">12 · Review</a>
+  </div>
+
+  <div class="note"><strong>Daily-life picture:</strong> working with a file is like using a <strong>library book</strong>. You must know <strong>where</strong> it is (file path), <strong>borrow</strong> it (open), <strong>read or write</strong> in it, and <strong>return</strong> it (close). If something goes wrong (the book is missing), you need a plan B (exception handling).</div>
+
+  <!-- ===== 1 ===== -->
+  <h2 id="f1">1. Text files</h2>
+  <p>A text file can be thought of as <strong>one long string stored on disk</strong>. A special character marks the end of each line. Operating systems use different end-of-line markers, but Python handles that for us and always uses the newline character <code>\n</code>.</p>
+  <div class="cmp">
+    <div>
+      <p class="st-label">What you see in Notepad</p>
+<pre class="big">Hello
+World
+
+Goodbye 4ever!</pre>
+    </div>
+    <div>
+      <p class="st-label">What Python sees: one string</p>
+      <div class="chars" id="charsDemo"></div>
+    </div>
+  </div>
+  <p>The empty line in the middle is just two <code>\n</code> in a row. The file ends with a <code>\n</code> too. This string is <strong>28 characters</strong> long, and the reading demos below use exactly this file.</p>
+
+  <h3>The basic workflow</h3>
+  <ol class="steps">
+    <li><strong>Open</strong> the file: connect a file on disk to a <strong>file object</strong> in the program.</li>
+    <li><strong>Read or write</strong> through that file object.</li>
+    <li><strong>Close</strong> the file when you no longer need it.</li>
+  </ol>
+
+  <!-- ===== 2 ===== -->
+  <h2 id="f2">2. File paths</h2>
+  <p>A <strong>file path</strong> tells the program where the file is. It is made of components separated by a special character: drive or root, then folders, and the <strong>file name last</strong>.</p>
+  <div class="path">
+    <span class="pc drive">C:</span><span class="sep">\</span><span class="pc dir">Users</span><span class="sep">\</span><span class="pc dir">User</span><span class="sep">\</span><span class="pc dir">Desktop</span><span class="sep">\</span><span class="pc file">testing.docx</span>
+  </div>
+  <p class="status"><span class="lg drive">drive</span> <span class="lg dir">folders</span> <span class="lg file">file name (always last)</span></p>
+
+  <div class="tbl"><table>
+    <tr><th>System</th><th>Separator</th><th>Example</th></tr>
+    <tr><td>Linux / macOS</td><td><code>/</code> (forward slash)</td><td><code>"/home/user/testing.docx"</code></td></tr>
+    <tr><td>Windows</td><td><code>\</code> (backslash)</td><td><code>C:\Users\User\Desktop\testing.docx</code></td></tr>
+  </table></div>
+
+  <h3>Writing a Windows path in Python</h3>
+  <p>In a Python string, the backslash starts an <strong>escape sequence</strong> (<code>\n</code> = new line, <code>\t</code> = tab). So a Windows path needs special care. Two correct ways:</p>
+  <div class="cmp">
+<pre class="big"><span class="ok-t">✔ Way 1: double every backslash</span>
+"C:\\Users\\User\\Desktop\\testing.docx"</pre>
+<pre class="big"><span class="ok-t">✔ Way 2: raw string, r before the quote</span>
+r"C:\Users\User\Desktop\testing.docx"</pre>
+  </div>
+  <p>Forward slashes also work on Windows: <code>"C:/Users/User/Desktop/testing.docx"</code>.</p>
+  <div class="warn"><strong>Careful with slide 27:</strong> <code>open('C:\Users\User\Desktop\testing.txt')</code> does not even run. <code>\U</code> starts a Unicode escape, so Python gives <em>SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes</em>. Other paths fail silently instead: in <code>"C:\new\test.txt"</code>, <code>\n</code> becomes a new line and <code>\t</code> a tab. Always use <code>r"..."</code> or <code>\\</code>.</div>
+
+  <div class="tbl"><table>
+    <tr><th>Path type</th><th>Example</th><th>Meaning</th></tr>
+    <tr><td><strong>Relative</strong></td><td><code>"testing.txt"</code></td><td>looks in the <strong>same folder the script is run from</strong></td></tr>
+    <tr><td><strong>Absolute</strong></td><td><code>r"C:\Users\User\Desktop\testing.txt"</code></td><td>the full route from the drive or root</td></tr>
+  </table></div>
+
+  <!-- ===== 3 ===== -->
+  <h2 id="f3">3. Manipulating file paths: <code>os.path</code></h2>
+  <p>The <code>os.path</code> module works with path names and checks whether files and folders exist.</p>
+  <div class="tbl"><table>
+    <tr><th>Function</th><th>What it does</th><th>Example result (Windows)</th></tr>
+    <tr><td><code>os.path.abspath("Testing.txt")</code></td><td>full, absolute path from the root</td><td><code>C:\Users\User\Python\Chapter 3\Testing.txt</code></td></tr>
+    <tr><td><code>os.path.dirname(path)</code></td><td>removes the file name at the end, leaving the folder</td><td><code>C:\Users\User\Python\Chapter 3</code></td></tr>
+    <tr><td><code>os.path.basename(path)</code></td><td>only the file name</td><td><code>Testing.txt</code></td></tr>
+    <tr><td><code>os.path.isfile(path)</code></td><td>True if this <strong>file</strong> exists</td><td><code>True</code></td></tr>
+    <tr><td><code>os.path.isdir(path)</code></td><td>True if this <strong>folder</strong> exists</td><td><code>True</code></td></tr>
+    <tr><td><code>os.path.exists(path)</code></td><td>True if a file <strong>or</strong> folder exists</td><td><code>True</code></td></tr>
+  </table></div>
+<pre class="big">import os
+
+filename = "Testing.txt"
+path = os.path.abspath(filename)          # C:\Users\User\Python\Chapter 3\Testing.txt
+print(os.path.dirname(path))              # C:\Users\User\Python\Chapter 3
+print(os.path.basename(path))             # Testing.txt
+print(os.path.isdir(os.path.dirname(path)))  # True
+print(os.path.isfile(path))               # True (only if the file really exists)</pre>
+  <div class="note"><strong>Tip:</strong> <code>abspath()</code>, <code>dirname()</code> and <code>basename()</code> only work on the <strong>text</strong> of the path; they don't check the disk. <code>isfile()</code>, <code>isdir()</code> and <code>exists()</code> do check the disk. In the Code Lab, Python runs inside your browser, so paths look like <code>/home/pyodide/Testing.txt</code> instead of <code>C:\...</code>.</div>
+
+  <!-- ===== 4 ===== -->
+  <h2 id="f4">4. Opening files and access modes</h2>
+<pre class="big">f = open("testing.txt", "r")
+#        ^ file path      ^ mode (optional, default "r")</pre>
+  <ul>
+    <li>The <strong>first argument</strong> (required) is the file path.</li>
+    <li>The <strong>second argument</strong> (optional) is the <strong>mode</strong>. Without it, the file opens <strong>read-only</strong>: <code>open("testing.txt")</code> is the same as <code>open("testing.txt", "r")</code>.</li>
+    <li>With no folder in the path, Python looks in the folder the script is run from.</li>
+  </ul>
+  <div class="tbl"><table>
+    <tr><th>Mode</th><th>Read?</th><th>Write?</th><th>File missing</th><th>File exists</th><th>Starts at</th></tr>
+    <tr><td><code>r</code> (default)</td><td>✔</td><td>✘</td><td><strong>FileNotFoundError</strong></td><td>keeps content</td><td>beginning</td></tr>
+    <tr><td><code>w</code></td><td>✘</td><td>✔</td><td>creates it</td><td><strong>erases everything</strong></td><td>beginning</td></tr>
+    <tr><td><code>a</code></td><td>✘</td><td>✔</td><td>creates it</td><td>keeps content</td><td><strong>end</strong> (append)</td></tr>
+    <tr><td><code>r+</code></td><td>✔</td><td>✔</td><td><strong>FileNotFoundError</strong></td><td>keeps content</td><td>beginning (writing overwrites characters)</td></tr>
+    <tr><td><code>w+</code></td><td>✔</td><td>✔</td><td>creates it</td><td><strong>erases everything</strong></td><td>beginning</td></tr>
+    <tr><td><code>a+</code></td><td>✔</td><td>✔</td><td>creates it</td><td>keeps content</td><td>end (writes always go to the end)</td></tr>
+  </table></div>
+  <p>Adding <code>+</code> to any mode allows <strong>both reading and writing</strong>.</p>
+
+  <div class="demo" id="modeDemo">
+    <h3 style="margin-top:0">Try it: what does each mode do?</h3>
+    <p class="status">testing.txt currently contains <code>Hello\nWorld\n</code>. Choose a mode and an action.</p>
+    <div class="md-row">
+      <div class="seg" id="mdExist"><button data-v="1" class="on">File exists</button><button data-v="0">File does not exist</button></div>
+    </div>
+    <div class="md-row">
+      <span>Mode:</span><div class="seg" id="mdMode"><button class="on">r</button><button>w</button><button>a</button><button>r+</button><button>w+</button><button>a+</button></div>
+    </div>
+    <div class="md-row">
+      <span>Action:</span><div class="seg" id="mdAct"><button data-v="read" class="on">f.read()</button><button data-v="write">f.write("Bye\n")</button></div>
+    </div>
+    <div class="md-out">
+      <div><p class="st-label">Python code</p><pre class="big" id="mdCode"></pre></div>
+      <div><p class="st-label">Result</p><div id="mdRes" class="md-res"></div></div>
+    </div>
+  </div>
+
+  <!-- ===== 5 ===== -->
+  <h2 id="f5">5. File objects</h2>
+  <p><code>open()</code> returns a <strong>file object</strong>, also called a <strong>file handler</strong>. Through it you read, write, and check information about the file.</p>
+  <div class="tbl"><table>
+    <tr><th>Attribute</th><th>Returns</th></tr>
+    <tr><td><code>f.name</code></td><td>the file name, e.g. <code>testing.txt</code></td></tr>
+    <tr><td><code>f.mode</code></td><td>the mode it was opened with, e.g. <code>r</code></td></tr>
+    <tr><td><code>f.closed</code></td><td><code>True</code> if the file is closed, otherwise <code>False</code></td></tr>
+  </table></div>
+<pre class="big">f = open("testing.txt", "r")
+print("File name is", f.name)      # File name is testing.txt
+print("File state is", f.closed)   # File state is False
+print("File mode is", f.mode)      # File mode is r
+f.close()
+print("File state is", f.closed)   # File state is True</pre>
+  <p>These are <strong>attributes</strong>, not methods, so there are no brackets: <code>f.closed</code>, not <code>f.closed()</code>.</p>
+
+  <!-- ===== 6 ===== -->
+  <h2 id="f6">6. Reading a file</h2>
+  <div class="tbl"><table>
+    <tr><th>Method</th><th>Returns</th><th>On our file</th></tr>
+    <tr><td><code>f.read()</code></td><td>the <strong>whole file</strong> as one string</td><td><code>'Hello\nWorld\n\nGoodbye 4ever!\n'</code></td></tr>
+    <tr><td><code>f.read(n)</code></td><td>the next <strong>n characters</strong></td><td><code>f.read(10)</code> → <code>'Hello\nWorl'</code></td></tr>
+    <tr><td><code>f.readline()</code></td><td>the next <strong>line</strong>, including its <code>\n</code></td><td><code>'Hello\n'</code></td></tr>
+    <tr><td><code>f.readline(n)</code></td><td>at most n characters of the current line</td><td><code>f.readline(3)</code> → <code>'Wor'</code></td></tr>
+    <tr><td><code>f.readlines()</code></td><td>a <strong>list</strong> of all lines</td><td><code>['Hello\n', 'World\n', '\n', 'Goodbye 4ever!\n']</code></td></tr>
+    <tr><td><code>for line in f:</code></td><td>one line per loop</td><td>best for big files: one line in memory at a time</td></tr>
+    <tr><td><code>f.tell()</code></td><td>the current position (number of characters from the start)</td><td><code>0</code> at the start</td></tr>
+    <tr><td><code>f.seek(0)</code></td><td>moves the position (here: back to the start)</td><td>read again from the beginning</td></tr>
+  </table></div>
+  <div class="note"><strong>Key idea: the file cursor.</strong> A file object remembers <strong>where it is</strong>. Each read moves the cursor forward, and the next read continues from there. When the cursor is at the end, reads return an empty string <code>''</code>. <code>seek(0)</code> rewinds it.</div>
+
+  <div class="demo" id="cursorDemo">
+    <h3 style="margin-top:0">Try it: watch the file cursor move</h3>
+    <p class="status">Run the slide examples one at a time. The <span class="cur-key">▌</span> marks the cursor; highlighted characters are what the last call returned.</p>
+    <div class="chars big" id="cdChars"></div>
+    <div class="cd-btns">
+      <button class="btn ghost" data-c="read(10)">f.read(10)</button>
+      <button class="btn ghost" data-c="read(20)">f.read(20)</button>
+      <button class="btn ghost" data-c="read()">f.read()</button>
+      <button class="btn ghost" data-c="readline()">f.readline()</button>
+      <button class="btn ghost" data-c="readline(3)">f.readline(3)</button>
+      <button class="btn ghost" data-c="readlines()">f.readlines()</button>
+      <button class="btn ghost" data-c="tell()">f.tell()</button>
+      <button class="btn" data-c="seek(0)">f.seek(0)</button>
+    </div>
+    <pre class="big" id="cdLog"></pre>
+  </div>
+
+  <h3>Why do my lines print with blank lines between them?</h3>
+<pre class="big">f = open("testing.txt", "r")
+for line in f:
+    print(line.lower())        # each line already ends with \n, and print() adds another</pre>
+  <p>Each <code>line</code> already ends with <code>\n</code>, and <code>print()</code> adds a second one. Fix it with <code>print(line.rstrip("\n"))</code>, <code>print(line.strip())</code> or <code>print(line, end="")</code>.</p>
+  <div class="note"><strong>On Windows:</strong> a new line is stored on disk as two bytes (<code>\r\n</code>), and <code>tell()</code> counts bytes. So on Windows, <code>tell()</code> after <code>read(20)</code> can be larger than 20. Python still gives you only <code>\n</code> when reading.</div>
+
+  <!-- ===== 7 ===== -->
+  <h2 id="f7">7. Writing to a file</h2>
+  <div class="tbl"><table>
+    <tr><th>Method</th><th>What it does</th></tr>
+    <tr><td><code>f.write(string)</code></td><td>writes one string and <strong>returns the number of characters written</strong>. It does <strong>not</strong> add <code>\n</code>: you must include it.</td></tr>
+    <tr><td><code>f.writelines(list_of_strings)</code></td><td>writes every string in a list. It does <strong>not</strong> add <code>\n</code> either.</td></tr>
+  </table></div>
+<pre class="big">f = open("testing v2.txt", "w")     # created if missing, ERASED if it exists
+string1, string2 = "Hello", "Bye"
+f.write(string1)
+f.write("\n")
+f.write(string2)
+f.write("\n")
+f.close()
+# testing v2.txt now contains:
+# Hello
+# Bye</pre>
+<pre class="big">f = open("testing v2.txt", "w")
+string_list = ["Hello\n", "World\n", "\n", "Goodbye 4ever!\n"]
+f.writelines(string_list)
+f.close()</pre>
+  <div class="warn"><strong>Slide 43 check:</strong> the list on the slide is <code>["Hello\n", "World\n", "Goodbye 4ever\n"]</code>, but the file shown has a blank line and an exclamation mark. To get that file, the list needs the extra <code>"\n"</code> item and <code>"Goodbye 4ever!\n"</code>, as above.</div>
+  <div class="tbl"><table>
+    <tr><th>Trap</th><th>What happens</th><th>Fix</th></tr>
+    <tr><td><code>f.write(85)</code></td><td>TypeError: write() argument must be str, not int</td><td><code>f.write(str(85))</code>; files hold <strong>text only</strong></td></tr>
+    <tr><td>number read back from a file</td><td><code>"85\n"</code> is a string</td><td><code>int(line)</code> or <code>float(line)</code> before doing maths</td></tr>
+    <tr><td><code>open(..., "w")</code> on an existing file</td><td>old content is erased <strong>immediately</strong></td><td>use <code>"a"</code> to add to the end</td></tr>
+    <tr><td>forgot <code>\n</code></td><td>everything ends up on one line</td><td><code>f.write(text + "\n")</code></td></tr>
+  </table></div>
+
+  <!-- ===== 8 ===== -->
+  <h2 id="f8">8. Closing a file</h2>
+  <p>Always <code>f.close()</code> when you're finished:</p>
+  <ul>
+    <li><strong>Saves the data:</strong> written text may wait in a memory buffer; closing makes sure it really reaches the disk. Without it, the file may be empty or incomplete (data loss, corruption).</li>
+    <li><strong>Frees resources:</strong> the operating system can only keep a limited number of files open.</li>
+    <li>If you forget, Python's <strong>garbage collector</strong> will close it eventually, but the file may stay open for a while.</li>
+  </ul>
+<pre class="big">f.close()
+f.read()     # ValueError: I/O operation on closed file.</pre>
+
+  <!-- ===== 9 ===== -->
+  <h2 id="f9">9. Handling file exceptions</h2>
+  <p>File operations depend on things outside your program, so they often fail. They raise an <strong>IOError</strong> (in Python 3 this is the same as <strong>OSError</strong>), or a more specific subclass of it:</p>
+  <div class="tbl"><table>
+    <tr><th>Situation</th><th>Exception</th></tr>
+    <tr><td>open a file for reading that doesn't exist</td><td><code>FileNotFoundError</code></td></tr>
+    <tr><td>no permission to read, or writing in a protected folder</td><td><code>PermissionError</code></td></tr>
+    <tr><td>create a file in a folder that doesn't exist</td><td><code>FileNotFoundError</code></td></tr>
+    <tr><td>disk or network error while accessing the file</td><td><code>OSError</code></td></tr>
+    <tr><td>write to a file opened with <code>"r"</code></td><td><code>io.UnsupportedOperation: not writable</code></td></tr>
+    <tr><td>use a file after <code>close()</code></td><td><code>ValueError: I/O operation on closed file</code></td></tr>
+  </table></div>
+  <p>If an error happens <strong>after</strong> opening, the program jumps out and <strong>the file is never closed</strong>. <code>try</code> / <code>except</code> / <code>finally</code> fixes that:</p>
+  <ul><li><code>try</code>: the code that might fail.</li><li><code>except</code>: runs if an error happens.</li><li><code>finally</code>: <strong>always</strong> runs, the right place for <code>close()</code>.</li></ul>
+  <div class="warn"><strong>Slide 55 has a hidden bug:</strong>
+<pre class="big">try:
+    f = open('testing.txt', 'r+')
+except:
+    print("Something went wrong while opening the file!")
+finally:
+    f.close()          # if open() failed, f was never created → NameError!</pre>
+  If the file is missing, <code>open()</code> fails, so <code>f</code> doesn't exist, and <code>finally</code> crashes with <em>NameError: name 'f' is not defined</em>. That's why slide 56 uses a <strong>nested</strong> try: the outer one handles <em>opening</em>, the inner one handles <em>reading/writing</em> and closes the file only if it opened.</div>
+<pre class="big">try:
+    f = open('testing.txt', 'r')         # outer try: opening
+    try:
+        f.write("Testing file exceptions.")   # fails: the file was opened with 'r'
+    except:
+        print("Something went wrong while writing the file!")
+    finally:
+        f.close()                        # runs only if open() worked
+except:
+    print("Something went wrong while opening the file!")</pre>
+  <p>Slide 56 prints <em>"Something went wrong while writing the file!"</em> because mode <code>'r'</code> can't write. Slide 57 changes the mode to <code>'w'</code>, and the write succeeds.</p>
+  <div class="note"><strong>Better practice:</strong> name the error, e.g. <code>except FileNotFoundError:</code>. A bare <code>except:</code> also hides your own typos.</div>
+
+  <!-- ===== 10 ===== -->
+  <h2 id="f10">10. The <code>with</code> statement (context manager)</h2>
+<pre class="big">with open('testing.txt', 'r') as f:
+    for line in f:
+        print(line.lower())
+# here the file is ALREADY closed, even if an error happened inside the block</pre>
+  <p><code>with</code> creates a <strong>context manager</strong> that <strong>closes the file automatically</strong> when the block ends, even if an exception is raised. It is the cleanest and safest way to work with files.</p>
+  <div class="cmp">
+<pre class="big"><span class="bad-t">Without with: 7 lines</span>
+f = open("data.txt", "r")
+try:
+    text = f.read()
+finally:
+    f.close()
+print(text)</pre>
+<pre class="big"><span class="ok-t">With with: 3 lines, same safety</span>
+with open("data.txt", "r") as f:
+    text = f.read()
+print(text)</pre>
+  </div>
+  <p><code>with</code> doesn't stop <code>open()</code> from failing, so a missing file still needs <code>try</code>/<code>except FileNotFoundError</code> around it.</p>
+
+  <!-- ===== 11 ===== -->
+  <h2 id="f11">11. Renaming, removing, copying and moving files</h2>
+  <div class="tbl"><table>
+    <tr><th>Code</th><th>Module</th><th>What it does</th></tr>
+    <tr><td><code>os.rename("testing.txt", "testing v2.txt")</code></td><td>os</td><td>renames (source → destination)</td></tr>
+    <tr><td><code>os.remove("testing.txt")</code></td><td>os</td><td><strong>deletes</strong> the file (no recycle bin!)</td></tr>
+    <tr><td><code>shutil.copy("testing.txt", r"C:\Users\User\Programming")</code></td><td>shutil</td><td>copies the file into that folder; the original stays</td></tr>
+    <tr><td><code>shutil.move("testing.txt", r"C:\Users\User\Programming")</code></td><td>shutil</td><td>moves the file; the original is gone</td></tr>
+  </table></div>
+  <div class="note"><strong>Safe habit:</strong> check first with <code>if os.path.isfile("testing.txt"):</code> before renaming or removing, or catch <code>FileNotFoundError</code>.</div>
+
+  <!-- ===== 12 ===== -->
+  <h2 id="f12">12. Review</h2>
+  <h3>Which read method should I use?</h3>
+  <div class="tbl"><table>
+    <tr><th>I want…</th><th>Use</th></tr>
+    <tr><td>the whole file as one string</td><td><code>f.read()</code></td></tr>
+    <tr><td>to process line by line (best for large files)</td><td><code>for line in f:</code></td></tr>
+    <tr><td>a list of lines (to count or index them)</td><td><code>f.readlines()</code></td></tr>
+    <tr><td>just the first line, e.g. a header</td><td><code>f.readline()</code></td></tr>
+  </table></div>
+  <h3>Common mistakes</h3>
+  <div class="tbl"><table>
+    <tr><th>Mistake</th><th>Result</th><th>Fix</th></tr>
+    <tr><td><code>open("C:\Users\...")</code></td><td>SyntaxError (unicode escape) or a wrong path</td><td><code>r"C:\Users\..."</code> or <code>\\</code></td></tr>
+    <tr><td>reading a file that doesn't exist</td><td>FileNotFoundError</td><td><code>try/except</code> or <code>os.path.isfile()</code></td></tr>
+    <tr><td><code>"w"</code> on an important file</td><td>its content is erased</td><td><code>"a"</code> to add, <code>"r"</code> to read</td></tr>
+    <tr><td>writing a number</td><td>TypeError</td><td><code>str(number)</code></td></tr>
+    <tr><td>doing maths on what you read</td><td>TypeError (it's a string)</td><td><code>int()</code> / <code>float()</code>, <code>strip()</code></td></tr>
+    <tr><td>forgetting <code>close()</code></td><td>data may not be saved</td><td>use <code>with</code></td></tr>
+    <tr><td>reading twice without <code>seek(0)</code></td><td>the second read gives <code>''</code></td><td><code>f.seek(0)</code> first</td></tr>
+    <tr><td><code>close()</code> in <code>finally</code> when <code>open()</code> may fail</td><td>NameError</td><td>nested try (slide 56) or <code>with</code></td></tr>
+  </table></div>
+  <div class="note">Next: run every example in the <strong>Code Lab</strong>, then test yourself in <strong>Quiz</strong> and <strong>Exam Practice</strong>.</div>
+</section>
+
+<!-- LAB -->
+<section id="lab" hidden>
+  <h1>Code Lab</h1>
+  <p class="lead">Pick an example, press <strong>Run</strong>, then change the code and run it again. Python runs in your browser, so nothing is installed. The first run takes a few seconds to load Python.</p>
+  <div class="lab">
+    <div class="ex-list" id="exList"></div>
+    <div class="editor">
+      <div class="editor-head">
+        <strong id="exTitle">Example</strong>
+        <span class="status" id="status"></span>
+        <button class="btn ghost" id="reset">Reset</button>
+        <button class="btn" id="run">▶ Run</button>
+      </div>
+      <textarea id="code" spellcheck="false" aria-label="Python code"></textarea>
+      <pre id="out" aria-live="polite">Output appears here.</pre>
+    </div>
+  </div>
+  <p class="status">Tip: press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to run. <code>input()</code> doesn't work here; set values in the code instead.</p>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" hidden>
+  <h1>Quiz</h1>
+  <p class="lead">Click an answer to check it. Each question explains the answer.</p>
+  <div class="quiz-top">
+    <span class="score" id="score">0 / 0</span>
+    <div class="progress"><span id="bar"></span></div>
+    <button class="btn ghost" id="restart">Restart</button>
+  </div>
+  <div id="qs"></div>
+</section>
+
+<!-- EXAM -->
+<section id="exam" hidden>
+  <h1>Exam Practice</h1>
+  <p class="lead">Structured questions in exam style. Write your answer on paper first, then open the model answer. You can paste any code into the Code Lab to check it.</p>
+  <div id="exams"></div>
+</section>
+</main>
+
+<footer>AMCS1034 Software Development Fundamentals · For learning purposes.</footer>
+
+<script>
+const EXAMPLES = [{"group": "Text files", "title": "1. A text file is one long string", "code": "# create the sample file used on the slides\nwith open(\"testing.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\\nGoodbye 4ever!\\n\")\n\nf = open(\"testing.txt\", \"r\")\ncontent = f.read()\nf.close()\n\nprint(content)          # how it looks\nprint(repr(content))    # what Python really stores: note the \\n\nprint(\"Characters:\", len(content))\nprint(\"Lines:\", content.count(\"\\n\"))\n"}, {"group": "Text files", "title": "2. The problem/solution: replace a word in a file", "code": "# Problem: replace() works on a string... but how about a FILE?\nwith open(\"story.txt\", \"w\") as f:\n    f.write(\"Python is a high-level language\\nI love Python\\n\")\n\n# Solution: read the file -> change the string -> write it back\nwith open(\"story.txt\", \"r\") as f:\n    text = f.read()\n\ntext = text.replace(\"Python\", \"Java\")\n\nwith open(\"story.txt\", \"w\") as f:\n    f.write(text)\n\nwith open(\"story.txt\", \"r\") as f:\n    print(f.read())\n"}, {"group": "File paths", "title": "3. Writing a Windows path", "code": "# Way 1: double the backslashes\npath1 = \"C:\\\\Users\\\\User\\\\Desktop\\\\testing.docx\"\n# Way 2: raw string\npath2 = r\"C:\\Users\\User\\Desktop\\testing.docx\"\nprint(path1)\nprint(path2)\nprint(\"Same path?\", path1 == path2)\n\n# The trap: a normal string turns \\n and \\t into special characters\nbad = \"C:\\new\\test.txt\"\nprint(bad)              # \\n became a new line and \\t a tab!\nprint(repr(bad))\n"}, {"group": "File paths", "title": "4. os.path: abspath, dirname, basename", "code": "# create the sample file used on the slides\nwith open(\"Testing.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\\nGoodbye 4ever!\\n\")\n\nimport os\n\nfilename = \"Testing.txt\"\npath = os.path.abspath(filename)\nprint(\"abspath :\", path)               # in the browser: /home/pyodide/...\nprint(\"dirname :\", os.path.dirname(path))\nprint(\"basename:\", os.path.basename(path))\n\n# These work on the TEXT of a path (Windows example, using ntpath):\nimport ntpath\nwin = r\"C:\\Users\\User\\Python\\Chapter 3\\Testing.txt\"\nprint()\nprint(\"dirname :\", ntpath.dirname(win))\nprint(\"basename:\", ntpath.basename(win))\n"}, {"group": "File paths", "title": "5. isfile, isdir, exists", "code": "# create the sample file used on the slides\nwith open(\"testing.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\\nGoodbye 4ever!\\n\")\n\nimport os\n\nprint(\"isfile('testing.txt'):\", os.path.isfile(\"testing.txt\"))\nprint(\"isfile('missing.txt'):\", os.path.isfile(\"missing.txt\"))\nfolder = os.path.dirname(os.path.abspath(\"testing.txt\"))\nprint(\"isdir(folder):        \", os.path.isdir(folder))\nprint(\"isfile(folder):       \", os.path.isfile(folder))   # a folder is not a file\nprint(\"exists(folder):       \", os.path.exists(folder))\n\n# Use it to avoid errors:\nname = \"missing.txt\"\nif os.path.isfile(name):\n    print(open(name).read())\nelse:\n    print(name, \"does not exist\")\n"}, {"group": "Opening files", "title": "6. Print a file in lowercase (slide 25)", "code": "# create the sample file used on the slides\nwith open(\"testing.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\\nGoodbye 4ever!\\n\")\n\nf = open(\"testing.txt\", \"r\")\nfor line in f:\n    print(line.lower())        # notice the extra blank lines!\nf.close()\n\nprint(\"----- fixed -----\")\nf = open(\"testing.txt\", \"r\")\nfor line in f:\n    print(line.lower(), end=\"\")   # the line already has its own \\n\nf.close()\n"}, {"group": "Opening files", "title": "7. File object attributes", "code": "# create the sample file used on the slides\nwith open(\"testing.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\\nGoodbye 4ever!\\n\")\n\nf = open(\"testing.txt\", \"r\")\nprint(\"File name is\", f.name)\nprint(\"File state is\", f.closed)\nprint(\"File mode is\", f.mode)\n\nf.close()\nprint(\"File state is\", f.closed)\n"}, {"group": "Opening files", "title": "8. Access modes: w erases, a appends", "code": "with open(\"log.txt\", \"w\") as f:\n    f.write(\"line 1\\n\")\n\nwith open(\"log.txt\", \"a\") as f:        # a: add to the end\n    f.write(\"line 2\\n\")\nprint(\"After a:\", repr(open(\"log.txt\").read()))\n\nwith open(\"log.txt\", \"w\") as f:        # w: ERASES first\n    f.write(\"new start\\n\")\nprint(\"After w:\", repr(open(\"log.txt\").read()))\n\nwith open(\"log.txt\", \"r+\") as f:       # r+: read and write, starts at position 0\n    print(\"r+ reads:\", repr(f.read()))\n    f.write(\"more\\n\")                 # cursor is at the end after reading\nprint(\"After r+:\", repr(open(\"log.txt\").read()))\n"}, {"group": "Reading", "title": "9. read() and read(n)", "code": "# create the sample file used on the slides\nwith open(\"testing.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\\nGoodbye 4ever!\\n\")\n\nf = open(\"testing.txt\", \"r\")\nprint(repr(f.read(10)))   # 'Hello\\nWorl'\nprint(repr(f.read(10)))   # 'd\\n\\nGoodbye'\nprint(repr(f.read(10)))   # ' 4ever!\\n'  (only 8 left)\nprint(repr(f.read(10)))   # ''  end of file\nf.close()\n\nf = open(\"testing.txt\", \"r\")\nprint(repr(f.read()))     # everything\nf.close()\n"}, {"group": "Reading", "title": "10. readline() and readlines()", "code": "# create the sample file used on the slides\nwith open(\"testing.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\\nGoodbye 4ever!\\n\")\n\nf = open(\"testing.txt\", \"r\")\nprint(repr(f.readline()))     # 'Hello\\n'\nprint(repr(f.readline(3)))    # 'Wor'\nprint(repr(f.readline()))     # 'ld\\n'   (rest of the same line)\nprint(repr(f.readline()))     # '\\n'     (the empty line)\nprint(repr(f.readline(50)))   # 'Goodbye 4ever!\\n'\nprint(repr(f.readline()))     # ''       end of file\nf.close()\n\nf = open(\"testing.txt\", \"r\")\nlines = f.readlines()\nf.close()\nprint(lines)\nprint(\"Number of lines:\", len(lines))\n"}, {"group": "Reading", "title": "11. tell() and seek()", "code": "# create the sample file used on the slides\nwith open(\"testing.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\\nGoodbye 4ever!\\n\")\n\nf = open(\"testing.txt\", \"r\")\nprint(f.tell())            # 0\nprint(repr(f.read(20)))    # 'Hello\\nWorld\\n\\nGoodbye'\nprint(f.tell())            # 20\nprint(repr(f.read(10)))    # ' 4ever!\\n'\nprint(f.tell())            # 28\nprint(repr(f.read()))      # ''  nothing left\nf.seek(0)                  # rewind\nprint(f.tell())            # 0\nprint(repr(f.readline()))  # read again from the start\nf.close()\n"}, {"group": "Reading", "title": "12. Clean lines with strip()", "code": "# create the sample file used on the slides\nwith open(\"testing.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\\nGoodbye 4ever!\\n\")\n\nwith open(\"testing.txt\", \"r\") as f:\n    lines = f.readlines()\nprint(lines)\n\nclean = [line.strip() for line in lines]\nprint(clean)\n\nnon_empty = [line.strip() for line in lines if line.strip() != \"\"]\nprint(non_empty)\n"}, {"group": "Writing", "title": "13. write() needs \\n (slide 41)", "code": "f = open(\"testing v2.txt\", \"w\")       # created because it doesn't exist\nstring1, string2 = \"Hello\", \"Bye\"\nn = f.write(string1)                   # write() returns the number of characters\nprint(\"write() returned\", n)\nf.write(\"\\n\")\nf.write(string2)\nf.write(\"\\n\")\nf.close()\n\nprint(repr(open(\"testing v2.txt\").read()))\n\n# Without \\n everything sticks together:\nwith open(\"no_newline.txt\", \"w\") as f:\n    f.write(\"Hello\")\n    f.write(\"Bye\")\nprint(repr(open(\"no_newline.txt\").read()))\n"}, {"group": "Writing", "title": "14. writelines() (slide 43, corrected)", "code": "f = open(\"testing v2.txt\", \"w\")\nstring_list = [\"Hello\\n\", \"World\\n\", \"\\n\", \"Goodbye 4ever!\\n\"]\nf.writelines(string_list)\nf.close()\n\nprint(open(\"testing v2.txt\").read())\n\n# writelines() does NOT add \\n for you:\nwith open(\"joined.txt\", \"w\") as f:\n    f.writelines([\"A\", \"B\", \"C\"])\nprint(repr(open(\"joined.txt\").read()))\n"}, {"group": "Writing", "title": "15. Numbers must be strings", "code": "marks = [85, 72.5, 90]\n\nwith open(\"marks.txt\", \"w\") as f:\n    for m in marks:\n        try:\n            f.write(m)                    # TypeError\n        except TypeError as e:\n            print(\"TypeError:\", e)\n            break\n    for m in marks:\n        f.write(str(m) + \"\\n\")            # convert to string first\n\n# Reading back gives STRINGS, convert to numbers before maths\nwith open(\"marks.txt\", \"r\") as f:\n    lines = f.readlines()\nprint(lines)\nnumbers = [float(x) for x in lines]       # float() ignores the \\n\nprint(\"Total:\", sum(numbers), \" Average:\", round(sum(numbers) / len(numbers), 2))\n"}, {"group": "Closing", "title": "16. Why close()? Data waits in a buffer", "code": "f = open(\"buffer.txt\", \"w\")\nf.write(\"Important data\")\nprint(\"Before close():\", repr(open(\"buffer.txt\").read()))   # may be empty!\nf.close()\nprint(\"After close(): \", repr(open(\"buffer.txt\").read()))\n\n# Using a closed file is an error\ntry:\n    f.write(\"more\")\nexcept ValueError as e:\n    print(\"ValueError:\", e)\n"}, {"group": "Exceptions", "title": "17. FileNotFoundError", "code": "try:\n    f = open(\"users.txt\", \"r\")\n    print(f.read())\n    f.close()\nexcept FileNotFoundError as e:\n    print(\"FileNotFoundError:\", e)\n\n# IOError is just another name for OSError in Python 3\nprint(IOError is OSError)\nprint(issubclass(FileNotFoundError, OSError))\n"}, {"group": "Exceptions", "title": "18. Slide 55's hidden bug", "code": "import os\nif os.path.exists(\"nofile.txt\"):\n    os.remove(\"nofile.txt\")\n\ntry:\n    try:\n        f = open(\"nofile.txt\", \"r+\")\n    except:\n        print(\"Something went wrong while opening the file!\")\n    finally:\n        f.close()                 # f was never created!\nexcept NameError as e:\n    print(\"NameError:\", e)\n"}, {"group": "Exceptions", "title": "19. Nested try: slide 56 vs 57", "code": "# create the sample file used on the slides\nwith open(\"testing.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\\nGoodbye 4ever!\\n\")\n\ndef demo(mode):\n    print(\"--- mode\", repr(mode))\n    try:\n        f = open(\"testing.txt\", mode)\n        try:\n            f.write(\"Testing file exceptions.\")\n            print(\"Write OK\")\n        except Exception as e:\n            print(\"Something went wrong while writing the file!\")\n            print(\"  (\", type(e).__name__, \":\", e, \")\")\n        finally:\n            f.close()\n            print(\"File closed:\", f.closed)\n    except Exception:\n        print(\"Something went wrong while opening the file!\")\n\ndemo(\"r\")     # slide 56: can't write in read mode\ndemo(\"w\")     # slide 57: works\nprint(repr(open(\"testing.txt\").read()))\n"}, {"group": "with", "title": "20. The with statement closes for you", "code": "# create the sample file used on the slides\nwith open(\"testing.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\\nGoodbye 4ever!\\n\")\n\nwith open(\"testing.txt\", \"r\") as f:\n    for line in f:\n        print(line.lower(), end=\"\")\n    print(\"Inside with, closed?\", f.closed)\n\nprint(\"After with, closed? \", f.closed)\n\n# Even if an error happens inside, the file is still closed\ntry:\n    with open(\"testing.txt\", \"r\") as g:\n        x = 10 / 0\nexcept ZeroDivisionError:\n    print(\"Error happened, but closed?\", g.closed)\n"}, {"group": "with", "title": "21. Count words and lines in a file", "code": "with open(\"poem.txt\", \"w\") as f:\n    f.write(\"Twinkle twinkle little star\\nHow I wonder what you are\\n\\nUp above the world so high\\n\")\n\nlines = words = chars = 0\nwith open(\"poem.txt\", \"r\") as f:\n    for line in f:\n        lines += 1\n        words += len(line.split())\n        chars += len(line)\n\nprint(\"Lines:\", lines)\nprint(\"Words:\", words)\nprint(\"Characters:\", chars)\n"}, {"group": "Rename, copy, move", "title": "22. os.rename() and os.remove()", "code": "# create the sample file used on the slides\nwith open(\"testing.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\\nGoodbye 4ever!\\n\")\n\nimport os\n\nif os.path.exists(\"testing v2.txt\"):     # clean up an earlier run\n    os.remove(\"testing v2.txt\")\n\nos.rename(\"testing.txt\", \"testing v2.txt\")\nprint(\"testing.txt exists?   \", os.path.isfile(\"testing.txt\"))\nprint(\"testing v2.txt exists?\", os.path.isfile(\"testing v2.txt\"))\n\nos.remove(\"testing v2.txt\")\nprint(\"after remove:\", os.path.isfile(\"testing v2.txt\"))\n\ntry:\n    os.remove(\"testing v2.txt\")      # already gone\nexcept FileNotFoundError as e:\n    print(\"FileNotFoundError:\", e)\n"}, {"group": "Rename, copy, move", "title": "23. shutil.copy() and shutil.move()", "code": "# create the sample file used on the slides\nwith open(\"testing.txt\", \"w\") as f:\n    f.write(\"Hello\\nWorld\\n\\nGoodbye 4ever!\\n\")\n\nimport os, shutil\n\nos.makedirs(\"Programming\", exist_ok=True)   # a folder to copy into\nif os.path.exists(\"Programming/testing.txt\"):  # clean up an earlier run\n    os.remove(\"Programming/testing.txt\")\n\nshutil.copy(\"testing.txt\", \"Programming\")\nprint(\"After copy:\", os.path.isfile(\"testing.txt\"), os.path.isfile(\"Programming/testing.txt\"))\n\nos.remove(\"Programming/testing.txt\")\nshutil.move(\"testing.txt\", \"Programming\")\nprint(\"After move:\", os.path.isfile(\"testing.txt\"), os.path.isfile(\"Programming/testing.txt\"))\nprint(os.listdir(\"Programming\"))\n"}, {"group": "Practice", "title": "24. Login check from users.txt (slide 52)", "code": "with open(\"users.txt\", \"w\") as f:\n    f.write(\"1001,abc123\\n1002,4everGr33N!\\n1003,python\\n\")\n\ndef login(user_id, password):\n    try:\n        with open(\"users.txt\", \"r\") as f:\n            for line in f:\n                uid, pw = line.strip().split(\",\")\n                if int(uid) == user_id and pw == password:\n                    return True\n        return False\n    except FileNotFoundError:\n        print(\"users.txt not found!\")\n        return False\n\n# input() does not work in the browser, so we test with fixed values\nprint(login(1002, \"4everGr33N!\"))\nprint(login(1002, \"wrong\"))\nprint(login(9999, \"abc\"))\n"}];
+
+/* ---------- tabs ---------- */
+const tabs = document.querySelectorAll('nav button');
+function showTab(name){
+  tabs.forEach(b => b.setAttribute('aria-selected', b.dataset.tab === name));
+  document.querySelectorAll('main > section').forEach(s => s.hidden = s.id !== name);
+  try { localStorage.setItem('tab', name); } catch(e){}
+  window.scrollTo(0,0);
+}
+tabs.forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+try { const t = localStorage.getItem('tab'); if (t && document.getElementById(t)) showTab(t); } catch(e){}
+
+/* ---------- theme ---------- */
+document.getElementById('theme').addEventListener('click', () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme = dark ? 'light' : 'dark';
+  setThemeLabel();
+});
+function setThemeLabel(){
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.getElementById('theme').textContent = dark ? 'Light mode' : 'Dark mode';
+}
+setThemeLabel();
+
+/* ---------- code lab ---------- */
+const list = document.getElementById('exList');
+const codeBox = document.getElementById('code');
+const outBox = document.getElementById('out');
+const statusEl = document.getElementById('status');
+let current = 0, lastGroup = null;
+EXAMPLES.forEach((ex, i) => {
+  if (ex.group !== lastGroup){
+    const g = document.createElement('div'); g.className = 'ex-group'; g.textContent = ex.group;
+    list.appendChild(g); lastGroup = ex.group;
+  }
+  const b = document.createElement('button'); b.textContent = ex.title;
+  b.addEventListener('click', () => loadEx(i)); list.appendChild(b);
+});
+function loadEx(i){
+  current = i;
+  list.querySelectorAll('button').forEach((b, j) => b.classList.toggle('active', j === i));
+  document.getElementById('exTitle').textContent = EXAMPLES[i].title;
+  codeBox.value = EXAMPLES[i].code;
+  outBox.textContent = 'Press Run to see the output.'; outBox.classList.remove('err');
+}
+loadEx(0);
+document.getElementById('reset').addEventListener('click', () => loadEx(current));
+codeBox.addEventListener('keydown', e => {
+  if (e.key === 'Tab'){ e.preventDefault();
+    const s = codeBox.selectionStart; codeBox.setRangeText('    ', s, codeBox.selectionEnd, 'end'); }
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); runCode(); }
+});
+
+let pyReady = null;
+function loadPy(){
+  if (pyReady) return pyReady;
+  statusEl.textContent = 'Loading Python…';
+  pyReady = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/pyodide@0.26.4/pyodide.js';
+    s.onload = () => loadPyodide({indexURL:'https://cdn.jsdelivr.net/npm/pyodide@0.26.4/'}).then(resolve, reject);
+    s.onerror = () => reject(new Error('Could not load Python. Check your internet connection.'));
+    document.head.appendChild(s);
+  });
+  pyReady.catch(() => { pyReady = null; });
+  return pyReady;
+}
+const runBtn = document.getElementById('run');
+async function runCode(){
+  runBtn.disabled = true; outBox.classList.remove('err'); outBox.textContent = '';
+  try {
+    const py = await loadPy();
+    statusEl.textContent = 'Running…';
+    let text = '';
+    py.setStdout({batched: s => { text += s + '\n'; }});
+    py.setStderr({batched: s => { text += s + '\n'; }});
+    const ns = py.globals.get('dict')();
+    ns.set('__name__', '__main__');
+    try {
+      await py.runPythonAsync(codeBox.value, {globals: ns});
+      outBox.textContent = text || '(no output: add a print() to see something)';
+    } catch (err) {
+      const msg = String(err.message || err);
+      const lines = msg.trim().split('\n');
+      const at = lines.findIndex(l => l.includes('File "<exec>"'));
+      const short = at >= 0 ? 'Traceback (most recent call last):\n' + lines.slice(at).join('\n') : lines.slice(-1).join('\n');
+      outBox.textContent = text + short; outBox.classList.add('err');
+    } finally { ns.destroy(); }
+    statusEl.textContent = '';
+  } catch (e) {
+    outBox.textContent = e.message; outBox.classList.add('err'); statusEl.textContent = '';
+  }
+  runBtn.disabled = false;
+}
+runBtn.addEventListener('click', runCode);
+
+/* ---------- quiz ---------- */
+const QUIZ = [{"q": "Which character does Python use to mark the end of each line in a text file?", "o": ["\\t", "\\n", "\\e", "\\\\"], "a": 1, "e": "Python always uses the newline character <code>\\n</code>, whatever the operating system stores."}, {"q": "What are the three basic steps of working with a file?", "o": ["read, write, delete", "open, read/write, close", "create, rename, remove", "import, open, print"], "a": 1, "e": "Open (connect the file to a file object), read or write through it, then close it."}, {"q": "Which is a correct Python string for the path <code>C:\\Users\\User\\test.txt</code>?", "o": ["\"C:\\Users\\User\\test.txt\"", "r\"C:\\Users\\User\\test.txt\"", "\"C:/Users/User/test.txt/\"", "path(C:\\Users\\User\\test.txt)"], "a": 1, "e": "A raw string (r before the quote) turns off backslash escapes. Without it, <code>\\U</code> causes a SyntaxError and <code>\\t</code> becomes a tab. <code>\\\\</code> or forward slashes also work."}, {"q": "In a file path, which component must the file name be?", "o": ["the first", "the last", "any position", "the second"], "a": 1, "e": "If a component of a path is a file name, it must be the last component."}, {"q": "What does <code>os.path.basename(r\"C:\\Users\\User\\Python\\Testing.txt\")</code> return on Windows?", "o": ["C:\\Users\\User\\Python", "Testing.txt", "Testing", "True"], "a": 1, "e": "<code>basename()</code> returns only the file name. <code>dirname()</code> returns the folder part."}, {"q": "Which function checks whether a <strong>folder</strong> exists?", "o": ["os.path.isfile()", "os.path.isdir()", "os.path.abspath()", "os.path.basename()"], "a": 1, "e": "<code>isdir()</code> checks for a directory, <code>isfile()</code> for a file."}, {"q": "What does <code>open(\"testing.txt\")</code> use when no mode is given?", "o": ["w", "a", "r (read only)", "r+"], "a": 2, "e": "The default mode is <code>\"r\"</code>, read only."}, {"q": "A file <code>marks.txt</code> already has 10 lines. What happens after <code>open(\"marks.txt\", \"w\")</code>?", "o": ["The 10 lines are kept and new text is added at the end", "The file's content is erased", "FileNotFoundError", "The file becomes read-only"], "a": 1, "e": "<code>\"w\"</code> overwrites: the old content is erased as soon as the file is opened. Use <code>\"a\"</code> to add to the end."}, {"q": "Which mode opens a file for reading <strong>and</strong> appending, creating it if it is missing?", "o": ["r+", "w+", "a+", "a"], "a": 2, "e": "<code>a+</code> reads and appends; it creates the file if needed and never erases it."}, {"q": "What happens with <code>open(\"nothere.txt\", \"r\")</code> if the file doesn't exist?", "o": ["An empty file is created", "FileNotFoundError", "It returns None", "PermissionError"], "a": 1, "e": "Read modes (<code>r</code>, <code>r+</code>) need the file to exist. Write/append modes create it."}, {"q": "What does this print?", "o": ["r", "'r'", "read", "True"], "a": 0, "e": "<code>f.mode</code> returns the mode the file was opened with.", "c": "f = open(\"testing.txt\", \"r\")\nprint(f.mode)\nf.close()"}, {"q": "What does this print?", "o": ["False", "True", "None", "Error"], "a": 1, "e": "After <code>close()</code>, the attribute <code>f.closed</code> is True. (No brackets: it is an attribute.)", "c": "f = open(\"testing.txt\")\nf.close()\nprint(f.closed)"}, {"q": "The file contains <code>Hello\\nWorld\\n\\nGoodbye 4ever!\\n</code>. What does this print?", "o": ["'Hello\\nWorl'", "'Hello\\nWorld'", "'Hello Worl'", "'Hello'"], "a": 0, "e": "<code>read(10)</code> returns the next 10 characters, and <code>\\n</code> counts as one character.", "c": "f = open(\"testing.txt\")\nprint(repr(f.read(10)))"}, {"q": "Same file. What does the second line print?", "o": ["'Hello\\n'", "'World\\n'", "'Wor'", "'ld\\n'"], "a": 3, "e": "<code>readline(3)</code> returned <code>'Wor'</code>; the next <code>readline()</code> continues from the cursor to the end of that same line.", "c": "f = open(\"testing.txt\")\nf.readline()\nf.readline(3)\nprint(repr(f.readline()))"}, {"q": "What type does <code>f.readlines()</code> return?", "o": ["str", "list", "tuple", "int"], "a": 1, "e": "A list of strings, one per line, each including its <code>\\n</code>."}, {"q": "What does this print?", "o": ["The whole file twice", "The whole file, then an empty string ''", "Error", "'' twice"], "a": 1, "e": "After the first <code>read()</code> the cursor is at the end, so the second returns <code>''</code>. Use <code>f.seek(0)</code> to read again.", "c": "f = open(\"testing.txt\")\na = f.read()\nb = f.read()\nprint(len(a), repr(b))"}, {"q": "What does <code>f.tell()</code> return right after opening a file in mode <code>\"r\"</code>?", "o": ["1", "0", "-1", "the file size"], "a": 1, "e": "The cursor starts at position 0, the beginning of the file."}, {"q": "Why does this loop print blank lines between the lines of the file?", "o": ["The file is corrupted", "Each line already ends with \\n and print() adds another", "readline() adds blank lines", "lower() adds \\n"], "a": 1, "e": "Fix with <code>print(line, end=\"\")</code> or <code>print(line.strip())</code>.", "c": "for line in f:\n    print(line.lower())"}, {"q": "What does this print?", "o": ["5", "6", "Hello", "None"], "a": 0, "e": "<code>write()</code> returns the number of characters written. It does not add <code>\\n</code>.", "c": "f = open(\"x.txt\", \"w\")\nprint(f.write(\"Hello\"))\nf.close()"}, {"q": "What happens with <code>f.write(85)</code>?", "o": ["85 is written", "TypeError: write() argument must be str, not int", "ValueError", "It writes '85\\n'"], "a": 1, "e": "Files store text only. Use <code>f.write(str(85))</code>."}, {"q": "Does <code>writelines([\"A\", \"B\"])</code> put A and B on separate lines?", "o": ["Yes", "No, the file contains AB", "Only on Windows", "It raises an error"], "a": 1, "e": "Like <code>write()</code>, <code>writelines()</code> does not add <code>\\n</code>. Include it in each string."}, {"q": "What happens when you call <code>f.read()</code> after <code>f.close()</code>?", "o": ["It returns ''", "ValueError: I/O operation on closed file", "It reopens the file", "Nothing"], "a": 1, "e": "A closed file object can't be used any more."}, {"q": "A file is opened with <code>\"r\"</code>, then <code>f.write(\"Hi\")</code> is called. What happens?", "o": ["Hi is written", "io.UnsupportedOperation: not writable", "FileNotFoundError", "The file is erased"], "a": 1, "e": "Mode <code>\"r\"</code> is read-only. That's why slide 56 prints \"Something went wrong while writing the file!\"."}, {"q": "In slide 55, why can <code>finally: f.close()</code> crash when the file is missing?", "o": ["close() can't be in finally", "open() failed, so f was never created → NameError", "finally runs before try", "The file is already closed"], "a": 1, "e": "If <code>open()</code> raises an error, <code>f</code> doesn't exist. Use a nested try (slide 56) or <code>with</code>."}, {"q": "What is the main advantage of <code>with open(...) as f:</code>?", "o": ["It is faster", "The file is closed automatically, even if an error happens", "It never raises FileNotFoundError", "It opens files in w mode"], "a": 1, "e": "The context manager always closes the file when the block ends. It does not stop <code>open()</code> from failing."}, {"q": "Which code copies <code>a.txt</code> into the folder <code>backup</code> and keeps the original?", "o": ["os.rename(\"a.txt\", \"backup\")", "shutil.move(\"a.txt\", \"backup\")", "shutil.copy(\"a.txt\", \"backup\")", "os.remove(\"a.txt\")"], "a": 2, "e": "<code>shutil.copy</code> copies (the original stays); <code>shutil.move</code> moves it; <code>os.rename</code> renames."}, {"q": "<code>IOError</code> in Python 3 is…", "o": ["a SyntaxError", "another name for OSError", "only for network errors", "removed from Python"], "a": 1, "e": "<code>IOError is OSError</code> is True. FileNotFoundError and PermissionError are subclasses of OSError."}];
+let answered = 0, correct = 0;
+function renderQuiz(){
+  answered = 0; correct = 0; updateScore();
+  const box = document.getElementById('qs'); box.innerHTML = '';
+  QUIZ.forEach((item, i) => {
+    const d = document.createElement('div'); d.className = 'q';
+    d.innerHTML = `<div class="qn">Question ${i+1} of ${QUIZ.length}</div><div>${item.q}</div>` +
+      (item.c ? `<pre>${item.c.replace(/</g,'&lt;')}</pre>` : '') + `<div class="opts"></div>`;
+    const opts = d.querySelector('.opts');
+    item.o.forEach((text, j) => {
+      const b = document.createElement('button'); b.innerHTML = text;
+      b.addEventListener('click', () => {
+        opts.querySelectorAll('button').forEach((x, k) => { x.disabled = true; if (k === item.a) x.classList.add('right'); });
+        if (j !== item.a) b.classList.add('wrong'); else correct++;
+        answered++; updateScore();
+        const ex = document.createElement('div'); ex.className = 'explain';
+        ex.innerHTML = (j === item.a ? '<strong>Correct.</strong> ' : '<strong>Not quite.</strong> ') + item.e;
+        d.appendChild(ex);
+      });
+      opts.appendChild(b);
+    });
+    box.appendChild(d);
+  });
+}
+function updateScore(){
+  document.getElementById('score').textContent = `${correct} / ${answered}`;
+  document.getElementById('bar').style.width = (answered / QUIZ.length * 100) + '%';
+}
+document.getElementById('restart').addEventListener('click', renderQuiz);
+renderQuiz();
+
+/* ---------- exam ---------- */
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const EXAM = [{"t": "Explain", "m": 4, "q": "(a) Explain why a Windows path such as <code>\"C:\\new\\test.txt\"</code> causes problems in Python. (b) Give TWO correct ways to write it.", "a": "<p>(a) In a Python string, the backslash starts an escape sequence: <code>\\n</code> becomes a new line and <code>\\t</code> a tab, so the path is wrong. (Some, like <code>\\U</code>, even cause a SyntaxError.)</p><p>(b) <code>\"C:\\\\new\\\\test.txt\"</code> (double each backslash) or <code>r\"C:\\new\\test.txt\"</code> (raw string). Forward slashes <code>\"C:/new/test.txt\"</code> also work.</p>"}, {"t": "Access modes", "m": 6, "q": "For each mode, state whether the file can be read, whether it can be written, and what happens if the file does not exist: <code>r</code>, <code>w</code>, <code>a</code>.", "a": "<table><tr><th>Mode</th><th>Read</th><th>Write</th><th>File missing</th></tr><tr><td>r</td><td>Yes</td><td>No</td><td>FileNotFoundError</td></tr><tr><td>w</td><td>No</td><td>Yes (erases old content)</td><td>creates a new file</td></tr><tr><td>a</td><td>No</td><td>Yes (adds to the end)</td><td>creates a new file</td></tr></table>"}, {"t": "Predict the output: reading", "m": 5, "q": "<code>testing.txt</code> contains <code>Hello\\nWorld\\n\\nGoodbye 4ever!\\n</code>. State the output.", "c": "f = open(\"testing.txt\", \"r\")\nprint(repr(f.read(7)))\nprint(f.tell())\nprint(repr(f.readline()))\nprint(len(f.readlines()))\nf.seek(0)\nprint(repr(f.readline(4)))\nf.close()", "a": "<pre>'Hello\\nW'\n7\n'orld\\n'\n2\n'Hell'</pre><p><code>read(7)</code> takes 7 characters, so the cursor is at 7. <code>readline()</code> finishes the line \"World\". <code>readlines()</code> gets the remaining 2 lines (<code>'\\n'</code> and <code>'Goodbye 4ever!\\n'</code>). <code>seek(0)</code> rewinds, and <code>readline(4)</code> reads 4 characters.</p>"}, {"t": "Write a program", "m": 6, "q": "Write a program that asks the user for 5 student names and writes each name on a separate line in <code>students.txt</code>. Then reopen the file, read it, and display the names with a number in front (1. Ali, 2. Mei…). Use <code>with</code>.", "a": "<pre>with open(\"students.txt\", \"w\") as f:\n    for i in range(5):\n        name = input(\"Enter name: \")\n        f.write(name + \"\\n\")\n\nwith open(\"students.txt\", \"r\") as f:\n    count = 1\n    for line in f:\n        print(str(count) + \". \" + line.strip())\n        count += 1</pre><p>Marks: open with \"w\" (1), loop with input (1), write with \\n (1), reopen with \"r\" (1), loop over lines (1), strip and number (1).</p>"}, {"t": "Numbers in files", "m": 5, "q": "<code>scores.txt</code> has one score per line (e.g. <code>78</code>, <code>91</code>, <code>65</code>). Write a program that reads the scores and displays the total, highest and average (2 decimal places). Explain why a conversion is needed.", "a": "<pre>scores = []\nwith open(\"scores.txt\", \"r\") as f:\n    for line in f:\n        if line.strip() != \"\":\n            scores.append(int(line))\n\nprint(\"Total:\", sum(scores))\nprint(\"Highest:\", max(scores))\nprint(\"Average: %.2f\" % (sum(scores) / len(scores)))</pre><p>Everything read from a text file is a <strong>string</strong> (e.g. <code>\"78\\n\"</code>), so it must be converted with <code>int()</code> (or <code>float()</code>) before any calculation.</p>"}, {"t": "Closing files", "m": 4, "q": "Give THREE reasons why a file should be closed after use, and state what happens if a closed file is used again.", "a": "<ul><li>Makes sure written data is actually saved to disk (it may still be in a buffer), preventing data loss or corruption.</li><li>Frees the system resources used by the open file (prevents resource leakage).</li><li>Finishes the bookkeeping between the file on disk and the file object.</li></ul><p>Using a closed file raises <code>ValueError: I/O operation on closed file</code>.</p>"}, {"t": "Find the bug", "m": 5, "q": "Explain the problem with this code when <code>data.txt</code> does not exist, and rewrite it correctly.", "c": "try:\n    f = open(\"data.txt\", \"r\")\n    print(f.read())\nexcept:\n    print(\"Cannot open the file!\")\nfinally:\n    f.close()", "a": "<p>If <code>data.txt</code> doesn't exist, <code>open()</code> fails, so <code>f</code> is never created. The <code>finally</code> block still runs and <code>f.close()</code> raises <strong>NameError: name 'f' is not defined</strong>.</p><pre>try:\n    f = open(\"data.txt\", \"r\")\n    try:\n        print(f.read())\n    finally:\n        f.close()\nexcept FileNotFoundError:\n    print(\"Cannot open the file!\")</pre><p>or, simpler:</p><pre>try:\n    with open(\"data.txt\", \"r\") as f:\n        print(f.read())\nexcept FileNotFoundError:\n    print(\"Cannot open the file!\")</pre>"}, {"t": "os and shutil", "m": 5, "q": "Write Python statements to: (a) check whether <code>report.txt</code> exists; (b) if it does, rename it to <code>report_old.txt</code>; (c) copy <code>report_old.txt</code> into the folder <code>backup</code>; (d) delete <code>temp.txt</code>.", "a": "<pre>import os, shutil\n\nif os.path.isfile(\"report.txt\"):                 # (a)\n    os.rename(\"report.txt\", \"report_old.txt\")    # (b)\n    shutil.copy(\"report_old.txt\", \"backup\")      # (c)\n\nos.remove(\"temp.txt\")                             # (d)</pre>"}, {"t": "Predict the output: modes", "m": 4, "q": "State what <code>log.txt</code> contains at the end.", "c": "with open(\"log.txt\", \"w\") as f:\n    f.write(\"A\\n\")\nwith open(\"log.txt\", \"a\") as f:\n    f.write(\"B\\n\")\nwith open(\"log.txt\", \"w\") as f:\n    f.write(\"C\\n\")\nwith open(\"log.txt\", \"a\") as f:\n    f.writelines([\"D\", \"E\\n\"])", "a": "<pre>C\nDE</pre><p>The second <code>\"w\"</code> erases A and B. <code>\"a\"</code> then adds D and E; <code>writelines()</code> doesn't add a newline between them, so they end up on the same line.</p>"}, {"t": "Write a program: login", "m": 6, "q": "<code>users.txt</code> stores one user per line as <code>id,password</code>. Write a function <code>login(user_id, password)</code> that returns True if the pair is in the file, otherwise False. Display \"File not found\" if the file is missing.", "a": "<pre>def login(user_id, password):\n    try:\n        with open(\"users.txt\", \"r\") as f:\n            for line in f:\n                uid, pw = line.strip().split(\",\")\n                if int(uid) == user_id and pw == password:\n                    return True\n        return False\n    except FileNotFoundError:\n        print(\"File not found\")\n        return False\n\nprint(login(1002, \"4everGr33N!\"))   # True</pre><p>Marks: try/except FileNotFoundError (1), with open in \"r\" (1), loop over lines (1), strip and split (1), compare with int() (1), correct return values (1).</p>"}];
+document.getElementById('exams').innerHTML = EXAM.map((x, i) =>
+  `<div class="ex"><h3>Question ${i+1}: ${x.t} <span class="marks">[${x.m} marks]</span></h3>
+   <p>${x.q}</p>${x.c ? `<pre>${esc(x.c)}</pre>` : ''}
+   <details><summary>Show model answer</summary><div class="ans">${x.a}</div></details></div>`).join('');
+/* ---------- characters strip helper ---------- */
+const FILE_TEXT = "Hello\nWorld\n\nGoodbye 4ever!\n";
+function charsHTML(text, opts = {}){
+  let h = '';
+  for (let i = 0; i <= text.length; i++){
+    if (i === text.length){
+      if (opts.end) h += `<span class="ch endc${opts.cur === i ? ' cur' : ''}">EOF</span>`;
+      break;
+    }
+    const c = text[i];
+    let cls = 'ch' + (c === '\n' ? ' nl' : c === ' ' ? ' sp' : '');
+    if (opts.got && i >= opts.got[0] && i < opts.got[1]) cls += ' got';
+    else if (opts.cur !== undefined && i < opts.cur) cls += ' done';
+    if (opts.cur === i) cls += ' cur';
+    h += `<span class="${cls}">${c === '\n' ? '\\n' : c === ' ' ? '␣' : c}${opts.idx ? `<span class="ix">${i}</span>` : ''}</span>`;
+  }
+  return h;
+}
+document.getElementById('charsDemo').innerHTML = charsHTML(FILE_TEXT);
+
+/* ---------- cursor demo ---------- */
+{
+  let pos = 0, got = null;
+  const log = ['f = open("testing.txt", "r")'];
+  const chars = document.getElementById('cdChars'), logEl = document.getElementById('cdLog');
+  const pr = s => "'" + s.replace(/\n/g, '\\n') + "'";
+  function draw(){
+    chars.innerHTML = charsHTML(FILE_TEXT, {cur: pos, got, idx: true, end: true});
+    logEl.textContent = log.slice(-10).join('\n'); logEl.scrollTop = 1e6;
+  }
+  function readline(n){
+    let end = FILE_TEXT.indexOf('\n', pos); end = end < 0 ? FILE_TEXT.length : end + 1;
+    if (n !== undefined) end = Math.min(end, pos + n);
+    const s = FILE_TEXT.slice(pos, end); got = [pos, end]; pos = end; return s;
+  }
+  document.querySelectorAll('.cd-btns button').forEach(b => b.addEventListener('click', () => {
+    const c = b.dataset.c; let out;
+    got = null;
+    if (c.startsWith('read(')){
+      const m = /read\((\d*)\)/.exec(c); const n = m[1] ? +m[1] : FILE_TEXT.length;
+      const end = Math.min(FILE_TEXT.length, pos + n); out = pr(FILE_TEXT.slice(pos, end)); got = [pos, end]; pos = end;
+      if (got[0] === got[1]) out += '      # nothing left: end of file';
+    } else if (c === 'readline()') { out = pr(readline()); if (got[0] === got[1]) out += '      # end of file'; }
+    else if (c === 'readline(3)') out = pr(readline(3));
+    else if (c === 'readlines()'){
+      const parts = []; const start = pos;
+      while (pos < FILE_TEXT.length){ parts.push(pr(readline())); }
+      got = [start, pos]; out = '[' + parts.join(', ') + ']';
+    }
+    else if (c === 'tell()') out = String(pos);
+    else if (c === 'seek(0)'){ pos = 0; out = '0      # back to the start'; }
+    log.push('>>> f.' + c, out); draw();
+  }));
+  draw();
+}
+
+/* ---------- access mode demo ---------- */
+{
+  const R = {
+"1|r|read": {
+"ret": "'Hello\\nWorld\\n'",
+"file": "'Hello\\nWorld\\n'"
+},
+"1|r|write": {
+"err": "io.UnsupportedOperation: not writable",
+"file": "'Hello\\nWorld\\n'"
+},
+"1|w|read": {
+"err": "io.UnsupportedOperation: not readable",
+"file": "''"
+},
+"1|w|write": {
+"ret": "4",
+"file": "'Bye\\n'"
+},
+"1|a|read": {
+"err": "io.UnsupportedOperation: not readable",
+"file": "'Hello\\nWorld\\n'"
+},
+"1|a|write": {
+"ret": "4",
+"file": "'Hello\\nWorld\\nBye\\n'"
+},
+"1|r+|read": {
+"ret": "'Hello\\nWorld\\n'",
+"file": "'Hello\\nWorld\\n'"
+},
+"1|r+|write": {
+"ret": "4",
+"file": "'Bye\\no\\nWorld\\n'"
+},
+"1|w+|read": {
+"ret": "''",
+"file": "''"
+},
+"1|w+|write": {
+"ret": "4",
+"file": "'Bye\\n'"
+},
+"1|a+|read": {
+"ret": "''",
+"file": "'Hello\\nWorld\\n'"
+},
+"1|a+|write": {
+"ret": "4",
+"file": "'Hello\\nWorld\\nBye\\n'"
+},
+"0|r|read": {
+"err": "FileNotFoundError: [Errno 2] No such file or directory: 'testing.txt'",
+"file": null
+},
+"0|r|write": {
+"err": "FileNotFoundError: [Errno 2] No such file or directory: 'testing.txt'",
+"file": null
+},
+"0|w|read": {
+"err": "io.UnsupportedOperation: not readable",
+"file": "''"
+},
+"0|w|write": {
+"ret": "4",
+"file": "'Bye\\n'"
+},
+"0|a|read": {
+"err": "io.UnsupportedOperation: not readable",
+"file": "''"
+},
+"0|a|write": {
+"ret": "4",
+"file": "'Bye\\n'"
+},
+"0|r+|read": {
+"err": "FileNotFoundError: [Errno 2] No such file or directory: 'testing.txt'",
+"file": null
+},
+"0|r+|write": {
+"err": "FileNotFoundError: [Errno 2] No such file or directory: 'testing.txt'",
+"file": null
+},
+"0|w+|read": {
+"ret": "''",
+"file": "''"
+},
+"0|w+|write": {
+"ret": "4",
+"file": "'Bye\\n'"
+},
+"0|a+|read": {
+"ret": "''",
+"file": "''"
+},
+"0|a+|write": {
+"ret": "4",
+"file": "'Bye\\n'"
+}
+};
+  let exists = '1', mode = 'r', act = 'read';
+  const seg = (id, set) => document.querySelectorAll('#' + id + ' button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#' + id + ' button').forEach(x => x.classList.toggle('on', x === b));
+    set(b.dataset.v || b.textContent); draw();
+  }));
+  seg('mdExist', v => exists = v); seg('mdMode', v => mode = v); seg('mdAct', v => act = v);
+  const WHY = {
+    r: 'Read only. The file must already exist.',
+    w: 'Write only. The file is created if missing, and <strong>erased</strong> if it exists, as soon as it is opened.',
+    a: 'Append only. The file is created if missing; new text is added at the <strong>end</strong>.',
+    'r+': 'Read and write. The file must exist. The cursor starts at the beginning, so writing <strong>overwrites</strong> the first characters.',
+    'w+': 'Read and write, but the file is <strong>erased</strong> first, so there is nothing to read.',
+    'a+': 'Read and append. The cursor starts at the <strong>end</strong>, so read() gives \'\' unless you seek(0) first. Writes always go to the end.',
+  };
+  function draw(){
+    const r = R[`${exists}|${mode}|${act}`];
+    document.getElementById('mdCode').textContent =
+      (exists === '1' ? '# testing.txt contains: Hello\\nWorld\\n' : '# testing.txt does NOT exist') +
+      `\nf = open("testing.txt", "${mode}")\n` + (act === 'read' ? 'print(repr(f.read()))' : 'print(f.write("Bye\\n"))') + '\nf.close()';
+    let h = r.err ? `<div class="er">✘ ${r.err.replace(/</g, '&lt;')}</div>` : `<div class="ok">✔ returns ${r.ret}</div>`;
+    h += `<div style="margin-top:8px">File afterwards:</div>` + (r.file === null ? '<pre>(no file)</pre>' : `<pre>${r.file}</pre>`);
+    h += `<div class="why">${WHY[mode]}</div>`;
+    document.getElementById('mdRes').innerHTML = h;
+  }
+  draw();
+}
+</script>
+</body>
+</html>
